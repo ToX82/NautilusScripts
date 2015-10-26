@@ -1,0 +1,30 @@
+#!/bin/bash
+# Still a work-in-progress...
+# The generated command looks fine, but it is not actually working.
+
+cmd="gs -sDEVICE=pdfwrite -dNOPAUSE -dQUIET -dBATCH -sOutputFile=merged_file.pdf";
+count=0;
+ext='';
+
+for filename in "$NAUTILUS_SCRIPT_SELECTED_FILE_PATHS"; do
+    if [ "$filename" = "" || "$filename" = " " ]; then
+        exit
+    else
+        file=$(basename "$filename")
+        ext="${file##*.}"
+
+        if [ ! -f $filename ]; then
+            gdialog --title "Error" --msgbox "\nError: $file is not a file!" 200 300
+        elif [ ! $ext -eq "pdf" ]; then
+            gdialog --title "Error" --msgbox "\nError: $file is not a valid PDF ($ext). Skipping..." 200 300
+        else
+            cmd+=" '$filename'"
+            ((count+=1))
+        fi
+    fi
+done
+
+gdialog --title "Generated command" --msgbox "\n$cmd" 200 300
+if [ $count>0 ]; then
+    $cmd
+fi
